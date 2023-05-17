@@ -26,6 +26,10 @@ export interface TradeOptions {
    * Whether any of the tokens in the path are fee on transfer tokens, which should be handled with special methods
    */
   feeOnTransfer?: boolean
+
+  isRouterFee?: boolean
+
+  amountFeeAddMore?: string
 }
 
 export interface TradeOptionsDeadline extends Omit<TradeOptions, 'ttl'> {
@@ -67,7 +71,7 @@ export abstract class Router {
   /**
    * Cannot be constructed.
    */
-  private constructor() {}
+  private constructor() { }
   /**
    * Produces the on-chain method name to call and the hex encoded parameters to pass as arguments for a given trade.
    * @param trade to produce call parameters for
@@ -99,19 +103,19 @@ export abstract class Router {
         if (etherIn) {
           methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
+          args = options.isRouterFee ? [amountOut, path, to, deadline, [options.amountFeeAddMore ?? "0"]] : [amountOut, path, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
+          args = options.isRouterFee ? [amountIn, amountOut, path, to, deadline, [options.amountFeeAddMore ?? "0"]] : [amountIn, amountOut, path, to, deadline]
           value = ZERO_HEX
         } else {
           methodName = useFeeOnTransfer
             ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
             : 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
+          args = options.isRouterFee ? [amountIn, amountOut, path, to, deadline, [options.amountFeeAddMore ?? "0"]] : [amountIn, amountOut, path, to, deadline]
           value = ZERO_HEX
         }
         break
@@ -120,17 +124,17 @@ export abstract class Router {
         if (etherIn) {
           methodName = 'swapETHForExactTokens'
           // (uint amountOut, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
+          args = options.isRouterFee ? [amountOut, path, to, deadline, [options.amountFeeAddMore ?? "0"]] : [amountOut, path, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
+          args = options.isRouterFee ? [amountOut, amountIn, path, to, deadline, [options.amountFeeAddMore ?? "0"]] : [amountOut, amountIn, path, to, deadline]
           value = ZERO_HEX
         } else {
           methodName = 'swapTokensForExactTokens'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
+          args = options.isRouterFee ? [amountOut, amountIn, path, to, deadline, [options.amountFeeAddMore ?? "0"]] : [amountOut, amountIn, path, to, deadline]
           value = ZERO_HEX
         }
         break

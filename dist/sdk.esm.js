@@ -29,8 +29,8 @@ var Rounding;
   Rounding[Rounding["ROUND_HALF_UP"] = 1] = "ROUND_HALF_UP";
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
-var FACTORY_ADDRESS = '0x41838D4F691ee09cf77305A148BAB18217a35596';
-var INIT_CODE_HASH = '0x0e312d44a57f9f8277230943414d22b22f69a8a25abc4f7ce3eb45c4a56ad750';
+var FACTORY_ADDRESS = '0xfCCe87c5Ba2c5f694FE0FF8a4940599eC3845a9A';
+var INIT_CODE_HASH = '0x8c68ab9748161cdbebb8187e2149f5064d7587a257d3a40011f2dc7345c31e85';
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000);
 // exports for internal consumption
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
@@ -641,7 +641,7 @@ var Pair = /*#__PURE__*/function () {
   function Pair(tokenAmountA, tokenAmountB) {
     var tokenAmounts = tokenAmountA.token.sortsBefore(tokenAmountB.token) // does safety checks
     ? [tokenAmountA, tokenAmountB] : [tokenAmountB, tokenAmountA];
-    this.liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'Cake-LP', 'Pancake LPs');
+    this.liquidityToken = new Token(tokenAmounts[0].token.chainId, Pair.getAddress(tokenAmounts[0].token, tokenAmounts[1].token), 18, 'Echodex-LP', 'Echodex LPs');
     this.tokenAmounts = tokenAmounts;
   }
   Pair.getAddress = function getAddress(tokenA, tokenB) {
@@ -1181,38 +1181,44 @@ var Router = /*#__PURE__*/function () {
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
+          var _options$amountFeeAdd;
           methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens';
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline];
+          args = options.isRouterFee ? [amountOut, path, to, deadline, [(_options$amountFeeAdd = options.amountFeeAddMore) !== null && _options$amountFeeAdd !== void 0 ? _options$amountFeeAdd : "0"]] : [amountOut, path, to, deadline];
           value = amountIn;
         } else if (etherOut) {
+          var _options$amountFeeAdd2;
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH';
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline];
+          args = options.isRouterFee ? [amountIn, amountOut, path, to, deadline, [(_options$amountFeeAdd2 = options.amountFeeAddMore) !== null && _options$amountFeeAdd2 !== void 0 ? _options$amountFeeAdd2 : "0"]] : [amountIn, amountOut, path, to, deadline];
           value = ZERO_HEX;
         } else {
+          var _options$amountFeeAdd3;
           methodName = useFeeOnTransfer ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens' : 'swapExactTokensForTokens';
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline];
+          args = options.isRouterFee ? [amountIn, amountOut, path, to, deadline, [(_options$amountFeeAdd3 = options.amountFeeAddMore) !== null && _options$amountFeeAdd3 !== void 0 ? _options$amountFeeAdd3 : "0"]] : [amountIn, amountOut, path, to, deadline];
           value = ZERO_HEX;
         }
         break;
       case TradeType.EXACT_OUTPUT:
         !!useFeeOnTransfer ? process.env.NODE_ENV !== "production" ? invariant(false, 'EXACT_OUT_FOT') : invariant(false) : void 0;
         if (etherIn) {
+          var _options$amountFeeAdd4;
           methodName = 'swapETHForExactTokens';
           // (uint amountOut, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline];
+          args = options.isRouterFee ? [amountOut, path, to, deadline, [(_options$amountFeeAdd4 = options.amountFeeAddMore) !== null && _options$amountFeeAdd4 !== void 0 ? _options$amountFeeAdd4 : "0"]] : [amountOut, path, to, deadline];
           value = amountIn;
         } else if (etherOut) {
+          var _options$amountFeeAdd5;
           methodName = 'swapTokensForExactETH';
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline];
+          args = options.isRouterFee ? [amountOut, amountIn, path, to, deadline, [(_options$amountFeeAdd5 = options.amountFeeAddMore) !== null && _options$amountFeeAdd5 !== void 0 ? _options$amountFeeAdd5 : "0"]] : [amountOut, amountIn, path, to, deadline];
           value = ZERO_HEX;
         } else {
+          var _options$amountFeeAdd6;
           methodName = 'swapTokensForExactTokens';
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline];
+          args = options.isRouterFee ? [amountOut, amountIn, path, to, deadline, [(_options$amountFeeAdd6 = options.amountFeeAddMore) !== null && _options$amountFeeAdd6 !== void 0 ? _options$amountFeeAdd6 : "0"]] : [amountOut, amountIn, path, to, deadline];
           value = ZERO_HEX;
         }
         break;
