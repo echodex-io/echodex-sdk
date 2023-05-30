@@ -11,6 +11,7 @@ import { TokenAmount } from './fractions/tokenAmount'
 import { Pair } from './pair'
 import { Route } from './route'
 import { currencyEquals, Token, WETH } from './token'
+import JSBI from 'jsbi';
 
 /**
  * Returns the percent difference between the mid price and the execution price, i.e. price impact.
@@ -133,6 +134,8 @@ export class Trade {
    */
   public readonly priceImpact: Percent
 
+  public readonly amountFeeAddMore: JSBI
+
   /**
    * Constructs an exact in trade with the given amount in and route
    * @param route route of the exact in trade
@@ -180,14 +183,14 @@ export class Trade {
       tradeType === TradeType.EXACT_INPUT
         ? amount
         : route.input === ETHER
-        ? CurrencyAmount.ether(amounts[0].raw)
-        : amounts[0]
+          ? CurrencyAmount.ether(amounts[0].raw)
+          : amounts[0]
     this.outputAmount =
       tradeType === TradeType.EXACT_OUTPUT
         ? amount
         : route.output === ETHER
-        ? CurrencyAmount.ether(amounts[amounts.length - 1].raw)
-        : amounts[amounts.length - 1]
+          ? CurrencyAmount.ether(amounts[amounts.length - 1].raw)
+          : amounts[amounts.length - 1]
     this.executionPrice = new Price(
       this.inputAmount.currency,
       this.outputAmount.currency,
@@ -196,6 +199,20 @@ export class Trade {
     )
     this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
     this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
+
+    const amountFeeTokenOut = JSBI.divide(JSBI.BigInt(this.outputAmount.raw), JSBI.BigInt(1000)) // 0.1%
+
+    const pathFee = []
+    const amountFee: TokenAmount[] = new Array(pathFee.length)
+    const nextPairsFee: Pair[] = new Array(pathFee.length)
+    amountFee[0] = wrappedAmount(new CurrencyAmount(this.outputAmount.currency, amountFeeTokenOut), route.chainId)
+
+    for (let i = 0; i < pathFee.length - 1; i++) {
+      const pair = pathFee[i]
+      const [outputAmount, nextPairFee] = pair.getOutputAmount(amounts[i])
+      amounts[i + 1] = outputAmount
+      nextPairsFee[i] = nextPairFee
+    }
   }
 
   /**
@@ -264,8 +281,8 @@ export class Trade {
       currencyAmountIn instanceof TokenAmount
         ? currencyAmountIn.token.chainId
         : currencyOut instanceof Token
-        ? currencyOut.chainId
-        : undefined
+          ? currencyOut.chainId
+          : undefined
     invariant(chainId !== undefined, 'CHAIN_ID')
 
     const amountIn = wrappedAmount(currencyAmountIn, chainId)
@@ -352,8 +369,8 @@ export class Trade {
       currencyAmountOut instanceof TokenAmount
         ? currencyAmountOut.token.chainId
         : currencyIn instanceof Token
-        ? currencyIn.chainId
-        : undefined
+          ? currencyIn.chainId
+          : undefined
     invariant(chainId !== undefined, 'CHAIN_ID')
 
     const amountOut = wrappedAmount(currencyAmountOut, chainId)
