@@ -202,17 +202,29 @@ export class Trade {
 
     const amountFeeTokenOut = JSBI.divide(JSBI.BigInt(this.outputAmount.raw), JSBI.BigInt(1000)) // 0.1%
 
-    const pathFee = []
+    const pathFee: string[] = [] // ["vivian", "medialFee", "fee"]
+    const pairsFee: Pair[] = new Array(pathFee.length)
+
+    for (let i = 0; i < pathFee.length - 1; i++) {
+      // var tokenA = await fetchTokenData(route.chainId, pathFee[i])
+      pairsFee[i] = await fetchPairData(
+        new Token(route.chainId, pathFee[i], 18),
+        new Token(route.chainId, pathFee[i + 1], 18)
+      )
+    }
+
     const amountFee: TokenAmount[] = new Array(pathFee.length)
     const nextPairsFee: Pair[] = new Array(pathFee.length)
     amountFee[0] = wrappedAmount(new CurrencyAmount(this.outputAmount.currency, amountFeeTokenOut), route.chainId)
 
-    for (let i = 0; i < pathFee.length - 1; i++) {
-      const pair = pathFee[i]
-      const [outputAmount, nextPairFee] = pair.getOutputAmount(amounts[i])
-      amounts[i + 1] = outputAmount
+    for (let i = 0; i < pairsFee.length - 1; i++) {
+      const pair = pairsFee[i]
+      const [outputAmount, nextPairFee] = pair.getOutputAmount(amountFee[i])
+      amountFee[i + 1] = outputAmount
       nextPairsFee[i] = nextPairFee
     }
+
+    //amountFeeAddMore = amountFee[amountFee.length - 1] - currentFee
   }
 
   /**
