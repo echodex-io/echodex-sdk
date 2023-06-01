@@ -1,10 +1,11 @@
-import { TradeType } from '../constants';
+import { ChainId, TradeType } from '../constants';
 import { Currency } from './currency';
 import { CurrencyAmount } from './fractions/currencyAmount';
 import { Percent } from './fractions/percent';
 import { Price } from './fractions/price';
 import { Pair } from './pair';
 import { Route } from './route';
+import JSBI from 'jsbi';
 interface InputOutput {
     readonly inputAmount: CurrencyAmount;
     readonly outputAmount: CurrencyAmount;
@@ -102,5 +103,6 @@ export declare class Trade {
      * @param bestTrades used in recursion; the current list of best trades
      */
     static bestTradeExactOut(pairs: Pair[], currencyIn: Currency, currencyAmountOut: CurrencyAmount, { maxNumResults, maxHops }?: BestTradeOptions, currentPairs?: Pair[], originalAmountOut?: CurrencyAmount, bestTrades?: Trade[]): Trade[];
+    static amountFeeAddMore(chainId: ChainId, currentFee: string, pairsFee: Pair[], amountOut: CurrencyAmount): JSBI;
 }
 export {};

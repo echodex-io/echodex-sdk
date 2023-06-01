@@ -13,8 +13,6 @@ import {
   ZERO,
   ONE,
   FIVE,
-  FEES_NUMERATOR,
-  FEES_DENOMINATOR,
   ChainId,
 } from '../constants'
 import { sqrt, parseBigintIsh } from '../utils'

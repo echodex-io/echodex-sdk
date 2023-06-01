@@ -134,8 +134,6 @@ export class Trade {
    */
   public readonly priceImpact: Percent
 
-  public readonly amountFeeAddMore: JSBI
-
   /**
    * Constructs an exact in trade with the given amount in and route
    * @param route route of the exact in trade
@@ -199,32 +197,6 @@ export class Trade {
     )
     this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
     this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
-
-    const amountFeeTokenOut = JSBI.divide(JSBI.BigInt(this.outputAmount.raw), JSBI.BigInt(1000)) // 0.1%
-
-    const pathFee: string[] = [] // ["vivian", "medialFee", "fee"]
-    const pairsFee: Pair[] = new Array(pathFee.length)
-
-    for (let i = 0; i < pathFee.length - 1; i++) {
-      // var tokenA = await fetchTokenData(route.chainId, pathFee[i])
-      pairsFee[i] = await fetchPairData(
-        new Token(route.chainId, pathFee[i], 18),
-        new Token(route.chainId, pathFee[i + 1], 18)
-      )
-    }
-
-    const amountFee: TokenAmount[] = new Array(pathFee.length)
-    const nextPairsFee: Pair[] = new Array(pathFee.length)
-    amountFee[0] = wrappedAmount(new CurrencyAmount(this.outputAmount.currency, amountFeeTokenOut), route.chainId)
-
-    for (let i = 0; i < pairsFee.length - 1; i++) {
-      const pair = pairsFee[i]
-      const [outputAmount, nextPairFee] = pair.getOutputAmount(amountFee[i])
-      amountFee[i + 1] = outputAmount
-      nextPairsFee[i] = nextPairFee
-    }
-
-    //amountFeeAddMore = amountFee[amountFee.length - 1] - currentFee
   }
 
   /**
@@ -435,5 +407,18 @@ export class Trade {
     }
 
     return bestTrades
+  }
+
+  public static amountFeeAddMore(chainId: ChainId, currentFee: string, pairsFee: Pair[], amountOut: CurrencyAmount): JSBI {
+    const amountFee: TokenAmount[] = new Array(pairsFee.length + 1)
+    amountFee[0] = wrappedAmount(amountOut, chainId)
+
+    for (let i = 0; i < pairsFee.length; i++) {
+      const pair = pairsFee[i]
+      const [outputAmount,] = pair.getOutputAmount(amountFee[i])
+      amountFee[i + 1] = outputAmount
+    }
+
+    return JSBI.subtract(JSBI.BigInt(amountFee[amountFee.length - 1]), JSBI.BigInt(currentFee))
   }
 }
