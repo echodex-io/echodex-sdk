@@ -1149,7 +1149,7 @@ var Trade = /*#__PURE__*/function () {
         outputAmount = _pair$getOutputAmount3[0];
       amountFee[i + 1] = outputAmount;
     }
-    return JSBI.subtract(JSBI.BigInt(amountFee[amountFee.length - 1]), JSBI.BigInt(currentFee));
+    return JSBI.subtract(amountFee[amountFee.length - 1].raw, JSBI.BigInt(currentFee));
   };
   return Trade;
 }();

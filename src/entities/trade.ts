@@ -419,6 +419,6 @@ export class Trade {
       amountFee[i + 1] = outputAmount
     }
 
-    return JSBI.subtract(JSBI.BigInt(amountFee[amountFee.length - 1]), JSBI.BigInt(currentFee))
+    return JSBI.subtract(amountFee[amountFee.length - 1].raw, JSBI.BigInt(currentFee))
   }
 }
