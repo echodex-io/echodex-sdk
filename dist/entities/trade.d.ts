@@ -104,5 +104,6 @@ export declare class Trade {
      */
     static bestTradeExactOut(pairs: Pair[], currencyIn: Currency, currencyAmountOut: CurrencyAmount, { maxNumResults, maxHops }?: BestTradeOptions, currentPairs?: Pair[], originalAmountOut?: CurrencyAmount, bestTrades?: Trade[]): Trade[];
     static amountFeeAddMore(chainId: ChainId, currentFee: string, pairsFee: Pair[], amountOut: CurrencyAmount): JSBI;
+    static amountFee(chainId: ChainId, pairsFee: Pair[], amountOut: CurrencyAmount): JSBI;
 }
 export {};

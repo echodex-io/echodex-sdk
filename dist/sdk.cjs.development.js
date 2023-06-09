@@ -1151,6 +1151,17 @@ var Trade = /*#__PURE__*/function () {
     }
     return JSBI.subtract(amountFee[amountFee.length - 1].raw, JSBI.BigInt(currentFee));
   };
+  Trade.amountFee = function amountFee(chainId, pairsFee, amountOut) {
+    var amountFee = new Array(pairsFee.length + 1);
+    amountFee[0] = wrappedAmount(amountOut, chainId);
+    for (var i = 0; i < pairsFee.length; i++) {
+      var pair = pairsFee[i];
+      var _pair$getOutputAmount4 = pair.getOutputAmount(amountFee[i]),
+        outputAmount = _pair$getOutputAmount4[0];
+      amountFee[i + 1] = outputAmount;
+    }
+    return amountFee[amountFee.length - 1].raw;
+  };
   return Trade;
 }();
 

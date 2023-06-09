@@ -421,4 +421,17 @@ export class Trade {
 
     return JSBI.subtract(amountFee[amountFee.length - 1].raw, JSBI.BigInt(currentFee))
   }
+
+  public static amountFee(chainId: ChainId, pairsFee: Pair[], amountOut: CurrencyAmount): JSBI {
+    const amountFee: TokenAmount[] = new Array(pairsFee.length + 1)
+    amountFee[0] = wrappedAmount(amountOut, chainId)
+
+    for (let i = 0; i < pairsFee.length; i++) {
+      const pair = pairsFee[i]
+      const [outputAmount,] = pair.getOutputAmount(amountFee[i])
+      amountFee[i + 1] = outputAmount
+    }
+
+    return amountFee[amountFee.length - 1].raw
+  }
 }
